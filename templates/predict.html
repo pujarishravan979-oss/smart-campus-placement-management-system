@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Prediction - Smart Campus</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 20px;
+        }
+
+        .prediction-container {
+            max-width: 750px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .prediction-container input,
+        .prediction-container select {
+            width: 100%;
+            padding: 11px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .prediction-container button {
+            background: #2855b5;
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef3ff;
+            border-radius: 6px;
+        }
+
+        .placed {
+            color: green;
+        }
+
+        .not-placed {
+            color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="prediction-container">
+
+    <h2>Placement Prediction</h2>
+
+    {% if student %}
+        <p>Predicting placement for:
+            <strong>{{ student['name'] }}</strong>
+        </p>
+        <p>USN: {{ student['usn'] }}</p>
+    {% else %}
+        <p>Enter student details to predict placement status.</p>
+    {% endif %}
+
+    {% if not student %}
+    <form method="POST">
+
+        <label>CGPA</label>
+        <input type="number" name="cgpa" min="0" max="10"
+               step="0.01" required>
+
+        <label>Number of Internships</label>
+        <input type="number" name="internships" min="0" required>
+
+        <label>Number of Projects</label>
+        <input type="number" name="projects" min="0" required>
+
+        <label>Workshops / Certifications</label>
+        <input type="number" name="workshops" min="0" required>
+
+        <label>Aptitude Test Score</label>
+        <input type="number" name="aptitude" min="0" max="100"
+               step="0.01" required>
+
+        <label>Soft Skills Rating (0-5)</label>
+        <input type="number" name="soft_skills" min="0" max="5"
+               step="0.1" required>
+
+        <label>Extracurricular Activities</label>
+        <select name="extracurricular" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+
+        <label>Placement Training</label>
+        <select name="training" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+
+        <label>SSC Marks</label>
+        <input type="number" name="ssc" min="0" max="100"
+               step="0.01" required>
+
+        <label>HSC Marks</label>
+        <input type="number" name="hsc" min="0" max="100"
+               step="0.01" required>
+
+        <button type="submit">Predict Placement</button>
+
+    </form>
+    {% endif %}
+
+    {% if prediction %}
+    <div class="result">
+
+        <h3>Prediction Result</h3>
+
+        {% if prediction == "Placed" %}
+            <h2 class="placed">Likely to be Placed</h2>
+        {% else %}
+            <h2 class="not-placed">Likely Not to be Placed</h2>
+        {% endif %}
+
+        <p>
+            Predicted Status:
+            <strong>{{ prediction }}</strong>
+        </p>
+
+        <small>
+            This is an ML-based estimate, not a guaranteed placement outcome.
+        </small>
+
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="result">
+        <p style="color: red;">{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="/">Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

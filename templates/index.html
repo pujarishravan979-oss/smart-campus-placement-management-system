@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        header {
+            background: #101735;
+            color: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .prediction-link, button {
+            display: inline-block;
+            background: #2855b5;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .card, .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #2855b5;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #101735;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .edit {
+            background: #25834b;
+            color: white;
+            padding: 7px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .predict {
+            background: #2855b5;
+            color: white;
+            padding: 7px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .delete {
+            background: #c0392b;
+            padding: 7px 12px;
+        }
+
+        .status, .placed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .not-placed {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .pending {
+            color: #777;
+        }
+
+        /* Prediction chart */
+
+        .chart-row {
+            margin: 22px 0;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .bar-background {
+            width: 100%;
+            height: 25px;
+            background: #e8eaf0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .placed-bar {
+            background: #25834b;
+        }
+
+        .not-placed-bar {
+            background: #c0392b;
+        }
+
+        .chart-note {
+            color: #777;
+            font-size: 13px;
+        }
+
+        @media(max-width: 750px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 650px) {
+            .cards, .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>SMART CAMPUS</h1>
+    </header>
+
+    <h2>Student Placement Dashboard</h2>
+    <p>Welcome to your placement management system.</p>
+
+    <a href="/predict" class="prediction-link">
+        Manual Placement Prediction
+    </a>
+
+    <!-- Dashboard Statistics -->
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Students</h3>
+            <h2>{{ total }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Placement Eligible</h3>
+            <h2>{{ eligible }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Average CGPA</h3>
+            <h2>{{ avg_cgpa }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Average Attendance</h3>
+            <h2>{{ avg_attendance }}%</h2>
+        </div>
+
+        <div class="card">
+            <h3>Predicted Placed</h3>
+            <h2>{{ placed_count }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Predicted Not Placed</h3>
+            <h2>{{ not_placed_count }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Total Predicted</h3>
+            <h2>{{ predicted_count }}</h2>
+        </div>
+
+    </div>
+
+    <!-- Placement Prediction Chart -->
+
+    <div class="section">
+
+        <h2>Placement Prediction Overview</h2>
+
+        <p>
+            Distribution of students based on ML prediction results.
+        </p>
+
+        {% if predicted_count > 0 %}
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+                    <span>Predicted Placed</span>
+                    <span>
+                        {{ placed_count }}
+                        ({{ "%.1f"|format(placed_count / predicted_count * 100) }}%)
+                    </span>
+                </div>
+
+                <div class="bar-background">
+                    <div class="bar placed-bar"
+                         style="width: {{ placed_count / predicted_count * 100 }}%;">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+                    <span>Predicted Not Placed</span>
+                    <span>
+                        {{ not_placed_count }}
+                        ({{ "%.1f"|format(not_placed_count / predicted_count * 100) }}%)
+                    </span>
+                </div>
+
+                <div class="bar-background">
+                    <div class="bar not-placed-bar"
+                         style="width: {{ not_placed_count / predicted_count * 100 }}%;">
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="chart-note">
+                Based on {{ predicted_count }} students who have received an ML prediction.
+            </p>
+
+        {% else %}
+
+            <p>No placement predictions available yet.</p>
+            <p>Click Predict beside a registered student to generate results.</p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Student Registration -->
+
+    <div class="section">
+
+        <h2>Student Registration</h2>
+
+        <form action="/register" method="POST">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Student Name</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div>
+                    <label>University Seat Number</label>
+                    <input type="text" name="usn" required>
+                </div>
+
+                <div>
+                    <label>CGPA</label>
+                    <input type="number" name="cgpa"
+                           min="0" max="10" step="0.01" required>
+                </div>
+
+                <div>
+                    <label>Attendance (%)</label>
+                    <input type="number" name="attendance"
+                           min="0" max="100" step="0.01" required>
+                </div>
+
+                <div>
+                    <label>Number of Backlogs</label>
+                    <input type="number" name="backlogs"
+                           min="0" required>
+                </div>
+
+                <div>
+                    <label>Technical Skills</label>
+                    <input type="text" name="skills"
+                           placeholder="Python, Java, etc." required>
+                </div>
+
+                <div>
+                    <label>Number of Internships</label>
+                    <input type="number" name="internships"
+                           min="0" required>
+                </div>
+
+                <div>
+                    <label>Number of Projects</label>
+                    <input type="number" name="projects"
+                           min="0" required>
+                </div>
+
+                <div>
+                    <label>Workshops / Certifications</label>
+                    <input type="number" name="workshops"
+                           min="0" required>
+                </div>
+
+                <div>
+                    <label>Aptitude Test Score</label>
+                    <input type="number" name="aptitude"
+                           min="0" max="100" step="0.01" required>
+                </div>
+
+                <div>
+                    <label>Soft Skills Rating (0-5)</label>
+                    <input type="number" name="soft_skills"
+                           min="0" max="5" step="0.1" required>
+                </div>
+
+                <div>
+                    <label>SSC Marks (%)</label>
+                    <input type="number" name="ssc"
+                           min="0" max="100" step="0.01" required>
+                </div>
+
+                <div>
+                    <label>HSC Marks (%)</label>
+                    <input type="number" name="hsc"
+                           min="0" max="100" step="0.01" required>
+                </div>
+
+                <div>
+                    <label>Extracurricular Activities</label>
+                    <select name="extracurricular" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Placement Training</label>
+                    <select name="training" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit">Register Student</button>
+
+        </form>
+
+    </div>
+
+    <!-- Registered Students -->
+
+    <div class="section">
+
+        <h2>Registered Students</h2>
+
+        <form action="/" method="GET">
+
+            <input type="text" name="search"
+                   placeholder="Search by name or USN"
+                   value="{{ search }}">
+
+            <button type="submit">Search</button>
+            <a href="/">Show All</a>
+
+        </form>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>USN</th>
+                    <th>CGPA</th>
+                    <th>Attendance</th>
+                    <th>Backlogs</th>
+                    <th>Skills</th>
+                    <th>Eligibility</th>
+                    <th>ML Prediction</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for student in students %}
+
+                <tr>
+
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.usn }}</td>
+                    <td>{{ student.cgpa }}</td>
+                    <td>{{ student.attendance }}%</td>
+                    <td>{{ student.backlogs }}</td>
+                    <td>{{ student.skills }}</td>
+
+                    <td>
+                        {% if check_eligibility(
+                            student.cgpa,
+                            student.attendance,
+                            student.backlogs
+                        ) %}
+                            <span class="status">Eligible</span>
+                        {% else %}
+                            <span style="color:red;">Not Eligible</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if student.predicted_status == "Placed" %}
+                            <span class="placed">Placed</span>
+                        {% elif student.predicted_status == "NotPlaced" %}
+                            <span class="not-placed">Not Placed</span>
+                        {% else %}
+                            <span class="pending">Not Predicted</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+
+                        <div class="actions">
+
+                            <a href="/edit/{{ student.id }}"
+                               class="edit">Edit</a>
+
+                            <a href="/predict/{{ student.id }}"
+                               class="predict">Predict</a>
+
+                            <form action="/delete/{{ student.id }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Delete this student?');">
+
+                                <button type="submit"
+                                        class="delete">Delete</button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="9">No students found.</td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

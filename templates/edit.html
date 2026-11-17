@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student - Smart Campus</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 20px;
+        }
+
+        .registration {
+            max-width: 750px;
+            margin: 25px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #2855b5;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        hr {
+            margin: 25px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>SMART CAMPUS</h1>
+
+    <div class="registration">
+
+        <h2>Edit Student Details</h2>
+
+        <form method="POST">
+
+            <h3>Basic Student Details</h3>
+
+            <label>Student Name</label>
+            <input type="text" name="name"
+                   value="{{ student['name'] }}" required>
+
+            <label>University Seat Number</label>
+            <input type="text" name="usn"
+                   value="{{ student['usn'] }}" required>
+
+            <label>CGPA</label>
+            <input type="number" name="cgpa"
+                   min="0" max="10" step="0.01"
+                   value="{{ student['cgpa'] }}" required>
+
+            <label>Attendance (%)</label>
+            <input type="number" name="attendance"
+                   min="0" max="100" step="0.01"
+                   value="{{ student['attendance'] }}" required>
+
+            <label>Backlogs</label>
+            <input type="number" name="backlogs"
+                   min="0" step="1"
+                   value="{{ student['backlogs'] }}" required>
+
+            <label>Technical Skills</label>
+            <input type="text" name="skills"
+                   value="{{ student['skills'] }}" required>
+
+            <hr>
+
+            <h3>Placement Prediction Details</h3>
+
+            <label>Number of Internships</label>
+            <input type="number" name="internships"
+                   min="0" step="1"
+                   value="{{ student['internships'] if student['internships'] is not none else '' }}"
+                   required>
+
+            <label>Number of Projects</label>
+            <input type="number" name="projects"
+                   min="0" step="1"
+                   value="{{ student['projects'] if student['projects'] is not none else '' }}"
+                   required>
+
+            <label>Workshops / Certifications</label>
+            <input type="number" name="workshops"
+                   min="0" step="1"
+                   value="{{ student['workshops'] if student['workshops'] is not none else '' }}"
+                   required>
+
+            <label>Aptitude Test Score</label>
+            <input type="number" name="aptitude"
+                   min="0" max="100" step="0.01"
+                   value="{{ student['aptitude'] if student['aptitude'] is not none else '' }}"
+                   required>
+
+            <label>Soft Skills Rating (0-5)</label>
+            <input type="number" name="soft_skills"
+                   min="0" max="5" step="0.1"
+                   value="{{ student['soft_skills'] if student['soft_skills'] is not none else '' }}"
+                   required>
+
+            <label>Extracurricular Activities</label>
+            <select name="extracurricular" required>
+                <option value="Yes"
+                    {% if student['extracurricular'] == 'Yes' %}selected{% endif %}>
+                    Yes
+                </option>
+                <option value="No"
+                    {% if student['extracurricular'] == 'No' %}selected{% endif %}>
+                    No
+                </option>
+            </select>
+
+            <label>Placement Training</label>
+            <select name="training" required>
+                <option value="Yes"
+                    {% if student['training'] == 'Yes' %}selected{% endif %}>
+                    Yes
+                </option>
+                <option value="No"
+                    {% if student['training'] == 'No' %}selected{% endif %}>
+                    No
+                </option>
+            </select>
+
+            <label>SSC Marks (%)</label>
+            <input type="number" name="ssc"
+                   min="0" max="100" step="0.01"
+                   value="{{ student['ssc'] if student['ssc'] is not none else '' }}"
+                   required>
+
+            <label>HSC Marks (%)</label>
+            <input type="number" name="hsc"
+                   min="0" max="100" step="0.01"
+                   value="{{ student['hsc'] if student['hsc'] is not none else '' }}"
+                   required>
+
+            <br><br>
+
+            <button type="submit">Save Changes</button>
+
+            <a href="/">Cancel</a>
+
+        </form>
+
+    </div>
+
+</body>
+</html>
